@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\PerceptronHillClimberLibrary\PerceptronHillClimberLibrary\PerceptronHillClimberLibrary.csproj" />
+    <ProjectReference Include="..\..\..\..\Documents\Visual Studio 2019\Projects\PerceptronHillClimberLibrary\PerceptronHillClimberLibrary\PerceptronHillClimberLibrary.csproj" />
   </ItemGroup>
 
 </Project>

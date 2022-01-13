@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
 using PerceptronHillClimberLibrary;
 
 namespace LineOfBestFitPerceptronCore
@@ -38,7 +39,10 @@ namespace LineOfBestFitPerceptronCore
             yValue.Minimum = -originY + 5;
             yValue.Maximum = originY - 5;
 
+            random = new Random();
+
         }
+
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -64,22 +68,69 @@ namespace LineOfBestFitPerceptronCore
             return (x * M) + B;
         }
 
-        public static double MeanSquaredError(double output, double desiredOutput)
+        public static double MeanSquaredError(double[] output, double[] desiredOutput)
         {
-            return Math.Pow(desiredOutput - output, 2);
+            if (output.Length != desiredOutput.Length || output.Length == 0)
+            {
+                throw new ArgumentException();
+            }
+            //return Math.Pow(desiredOutput - output, 2);
+
+            double error = 0;
+
+            for (int i = 0; i < output.Length; i++)
+            {
+                error += Math.Pow(desiredOutput[i] - output[i], 2);
+            }
+
+            return error / output.Length;
         }
 
+        public static double MeanSquaredError(double output, double desiredOutput)
+        {
+            return Math.Pow((desiredOutput - output), 2);
+        }
 
-
+        double RegressionError(List<(decimal, decimal)> points)
+        {
+            //error is mean of the squares of residuals
+            //where the residual is y actual - y predicted from x actual
+            double[] yValues = points.Select(p => (double)p.Item2).ToArray();
+            return MeanSquaredError(points.Select(p => (double)p.Item1).Select(x => perceptron.Compute(new double[] { x })).ToArray(), yValues);
+        }
 
         private void LinearRegression_Click(object sender, EventArgs e)
         {
+            
             perceptron = new Perceptron(1, 0.1, random, MeanSquaredError);
 
             //Rest of the code for the linear regression. Use the library we have.
+
+            LinearRegression.Enabled = false;
+
+            //You need to fix this:
+            perceptron.TrainWithHillClimbing(DoubleConversion(dataPoints), SingleConversion(dataPoints, 2), perceptron.GetError(DoubleConversion(dataPoints), SingleConversion(dataPoints, 2)));
+
+            //make sure to repeat the hill climbing until you get within a certain amount of error or iterations
+
+            LinearRegression.Enabled = true;        
         }
 
 
+        private double[][] DoubleConversion(List<(decimal, decimal)> list)
+        {
+            return (list.Select(p => (double)p.Item1).Select(x => new double[] { x }).ToArray());
+        }
+
+        private double[] SingleConversion(List<(decimal, decimal)> list, int itemNumber = 1)
+        {
+            if (itemNumber == 1)
+            {
+                return list.Select(p => (double)p.Item1).ToArray();
+            }
+
+            return list.Select(p => (double)p.Item2).ToArray();
+        }
 
         public void Graph()
         {
