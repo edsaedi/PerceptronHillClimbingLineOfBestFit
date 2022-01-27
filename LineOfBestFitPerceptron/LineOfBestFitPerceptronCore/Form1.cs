@@ -58,9 +58,10 @@ namespace LineOfBestFitPerceptronCore
                 return;
             }
 
-            gfx.FillEllipse(Brushes.Black, location.X - 5, location.Y - 5, 10, 10);
+            //gfx.FillEllipse(Brushes.Black, location.X - 5, location.Y - 5, 10, 10);
             dataPoints.Add((location.X - 5, location.Y - 5));
-            canvasPictureBox.Image = canvas;
+            Graph();
+            //canvasPictureBox.Image = canvas;
         }
 
         public static decimal LinearEquationSolver(decimal x, decimal M, decimal B)
@@ -101,7 +102,7 @@ namespace LineOfBestFitPerceptronCore
 
         private void LinearRegression_Click(object sender, EventArgs e)
         {
-            
+
             perceptron = new Perceptron(1, 0.1, random, MeanSquaredError);
 
             //Rest of the code for the linear regression. Use the library we have.
@@ -109,11 +110,22 @@ namespace LineOfBestFitPerceptronCore
             LinearRegression.Enabled = false;
 
             //You need to fix this:
-            perceptron.TrainWithHillClimbing(DoubleConversion(dataPoints), SingleConversion(dataPoints, 2), perceptron.GetError(DoubleConversion(dataPoints), SingleConversion(dataPoints, 2)));
+            int iterations = 0;
+            while (iterations <= 1000000 && perceptron.GetError(DoubleConversion(dataPoints), SingleConversion(dataPoints, 2)) > 1)
+            {
+                perceptron.TrainWithHillClimbing(DoubleConversion(dataPoints), SingleConversion(dataPoints, 2), perceptron.GetError(DoubleConversion(dataPoints), SingleConversion(dataPoints, 2)));
+                iterations++;
+            }
 
+            //keep in mind that the bias is the y-intercept and the weights are the slope
             //make sure to repeat the hill climbing until you get within a certain amount of error or iterations
 
-            LinearRegression.Enabled = true;        
+            GraphLine();
+
+
+            LinearRegression.Enabled = true;
+
+
         }
 
 
@@ -142,6 +154,18 @@ namespace LineOfBestFitPerceptronCore
             {
                 gfx.FillEllipse(Brushes.Black, (float)point.Item1, (float)point.Item2, 10, 10);
             }
+
+            canvasPictureBox.Image = canvas;
+        }
+
+        public void GraphLine()
+        {
+            decimal slope = (decimal)perceptron.weights[0];
+            //there is only one value in our weights array and that is the slope.
+            decimal yIntercept = (decimal)perceptron.bias;
+            //the bias is the y-intercept
+
+            gfx.DrawLine(new Pen(Color.Black), new Point(0, (int)LinearEquationSolver(0, slope, yIntercept)), new Point(canvasPictureBox.Width, (int)LinearEquationSolver(canvasPictureBox.Width, slope, yIntercept)));
 
             canvasPictureBox.Image = canvas;
         }
