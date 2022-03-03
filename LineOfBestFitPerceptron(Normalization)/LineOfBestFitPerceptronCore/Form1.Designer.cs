@@ -40,6 +40,8 @@ namespace LineOfBestFitPerceptronCoreNormalization
             this.LinearRegression = new System.Windows.Forms.Button();
             this.xValue = new System.Windows.Forms.NumericUpDown();
             this.yValue = new System.Windows.Forms.NumericUpDown();
+            this.Iterations = new System.Windows.Forms.Label();
+            this.IterationCount = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.canvasPictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.xValue)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.yValue)).BeginInit();
@@ -159,11 +161,31 @@ namespace LineOfBestFitPerceptronCoreNormalization
             this.yValue.TabIndex = 12;
             this.yValue.Visible = false;
             // 
+            // Iterations
+            // 
+            this.Iterations.AutoSize = true;
+            this.Iterations.Location = new System.Drawing.Point(518, 182);
+            this.Iterations.Name = "Iterations";
+            this.Iterations.Size = new System.Drawing.Size(59, 15);
+            this.Iterations.TabIndex = 13;
+            this.Iterations.Text = "Iterations:";
+            // 
+            // IterationCount
+            // 
+            this.IterationCount.AutoSize = true;
+            this.IterationCount.Location = new System.Drawing.Point(518, 206);
+            this.IterationCount.Name = "IterationCount";
+            this.IterationCount.Size = new System.Drawing.Size(13, 15);
+            this.IterationCount.TabIndex = 14;
+            this.IterationCount.Text = "0";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.IterationCount);
+            this.Controls.Add(this.Iterations);
             this.Controls.Add(this.yValue);
             this.Controls.Add(this.xValue);
             this.Controls.Add(this.LinearRegression);
@@ -199,6 +221,8 @@ namespace LineOfBestFitPerceptronCoreNormalization
         private System.Windows.Forms.Button LinearRegression;
         private System.Windows.Forms.NumericUpDown xValue;
         private System.Windows.Forms.NumericUpDown yValue;
+        private System.Windows.Forms.Label Iterations;
+        private System.Windows.Forms.Label IterationCount;
     }
 }
 

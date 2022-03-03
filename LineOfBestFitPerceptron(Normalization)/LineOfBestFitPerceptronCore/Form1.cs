@@ -69,35 +69,9 @@ namespace LineOfBestFitPerceptronCoreNormalization
             return (x * M) + B;
         }
 
-        public static double MeanSquaredError(double[] output, double[] desiredOutput)
-        {
-            if (output.Length != desiredOutput.Length || output.Length == 0)
-            {
-                throw new ArgumentException();
-            }
-            //return Math.Pow(desiredOutput - output, 2);
-
-            double error = 0;
-
-            for (int i = 0; i < output.Length; i++)
-            {
-                error += Math.Pow(desiredOutput[i] - output[i], 2);
-            }
-
-            return error / output.Length;
-        }
-
         public static double MeanSquaredError(double output, double desiredOutput)
         {
             return Math.Pow((desiredOutput - output), 2);
-        }
-
-        double RegressionError(List<(decimal, decimal)> points)
-        {
-            //error is mean of the squares of residuals
-            //where the residual is y actual - y predicted from x actual
-            double[] yValues = points.Select(p => (double)p.Item2).ToArray();
-            return MeanSquaredError(points.Select(p => (double)p.Item1).Select(x => perceptron.Compute(new double[] { x })).ToArray(), yValues);
         }
 
         public decimal NormalizePoint(decimal min, decimal max, decimal nMin, decimal nMax, decimal value)
@@ -176,7 +150,7 @@ namespace LineOfBestFitPerceptronCoreNormalization
 
             int iterations = 0;
 
-            while (iterations <= 1000000 && perceptron.GetError(DoubleConversion(normalizedPoints), SingleConversion(normalizedPoints, 2)) > 0.01)
+            while (iterations <= 10000000 && perceptron.GetError(DoubleConversion(normalizedPoints), SingleConversion(normalizedPoints, 2)) > 0.001)
             {
                 //perceptron.TrainWithHillClimbing(DoubleConversion(dataPoints), SingleConversion(dataPoints, 2), perceptron.GetError(DoubleConversion(dataPoints), SingleConversion(dataPoints, 2)));
                 perceptron.TrainWithHillClimbing(DoubleConversion(normalizedPoints), SingleConversion(normalizedPoints, 2), perceptron.GetError(DoubleConversion(normalizedPoints), SingleConversion(normalizedPoints, 2)));
@@ -184,6 +158,8 @@ namespace LineOfBestFitPerceptronCoreNormalization
                 iterations++;
 
             }
+
+            IterationCount.Text = iterations.ToString();
 
             //keep in mind that the bias is the y-intercept and the weights are the slope
             //make sure to repeat the hill climbing until you get within a certain amount of error or iterations
@@ -253,25 +229,17 @@ namespace LineOfBestFitPerceptronCoreNormalization
             decimal min = dataPoints.Select(p => p.Item2).Min();
             decimal max = dataPoints.Select(p => p.Item2).Max();
 
+            var test = NormalizePoint(1, 100, 10, 1000, 50);
+            var untest = UnNormalizePoint(1, 100, 10, 1000, test);
+
             decimal yIntercept = UnNormalizePoint(min, max, 0, 1, yInterceptNormalized);
 
             //the bias is the y-intercept
 
-            gfx.DrawLine(new Pen(Color.Black), new Point(0, (int)LinearEquationSolver(0, slope, yIntercept)), new Point(canvasPictureBox.Width, (int)LinearEquationSolver(canvasPictureBox.Width, slope, yIntercept)));
+            var pointA = new Point(0, (int)LinearEquationSolver(-canvasPictureBox.Width / 2, slope, yIntercept));
+            var pointB = new Point(canvasPictureBox.Width, (int)LinearEquationSolver(canvasPictureBox.Width / 2, slope, yIntercept));
 
-            canvasPictureBox.Image = canvas;
-        }
-
-        public void GraphLine()
-        {
-            decimal slope = (decimal)perceptron.weights[0];
-            //Note that if the function is increasing, it will have a negative slope because the y-coordinates are flipped in this type of window forms.
-            //Remeber that the coordinate (0,0) is at the top left corner with x increasing as it moves to the right and y increasing as it moves down.
-            //there is only one value in our weights array and that is the slope.
-            decimal yIntercept = (decimal)perceptron.bias;
-            //the bias is the y-intercept
-
-            gfx.DrawLine(new Pen(Color.Black), new Point(0, (int)LinearEquationSolver(0, slope, yIntercept)), new Point(canvasPictureBox.Width, (int)LinearEquationSolver(canvasPictureBox.Width, slope, yIntercept)));
+            gfx.DrawLine(new Pen(Color.Black), pointA, pointB); ;
 
             canvasPictureBox.Image = canvas;
         }
