@@ -41,6 +41,14 @@ namespace LineOfBestFitPerceptronCoreNormalization
 
             random = new Random();
 
+
+            //Please delete this later:
+            dataPoints.Add((314, 79));
+            dataPoints.Add((230, 281));
+            dataPoints.Add((248, 360));
+            dataPoints.Add((296, 165));
+
+            Graph();
         }
 
 
@@ -137,34 +145,48 @@ namespace LineOfBestFitPerceptronCoreNormalization
 
             LinearRegression.Enabled = false;
 
-            
-            var normalizedPoints = NormalizeData(0, 1, 0, 1, dataPoints);
+            int iterations = 0;
 
-            //while (iterations <= 1000000 && perceptron.GetError(DoubleConversion(dataPoints), SingleConversion(dataPoints, 2)) > 1)
+            //var doubleConversion = DoubleConversion(dataPoints);
+
+            //var singleConversion = SingleConversion(dataPoints, 2);
+
+
+            //while (iterations <= 1000000 && perceptron.GetError(doubleConversion, singleConversion) > 0.001)
             //{
-            //    //perceptron.TrainWithHillClimbing(DoubleConversion(dataPoints), SingleConversion(dataPoints, 2), perceptron.GetError(DoubleConversion(dataPoints), SingleConversion(dataPoints, 2)));
-            //    perceptron.TrainWithHillClimbing(DoubleConversion(dataPoints), SingleConversion(dataPoints, 2), perceptron.GetError(DoubleConversion(dataPoints), SingleConversion(dataPoints, 2)));
+            //    perceptron.TrainWithHillClimbing(doubleConversion, singleConversion, perceptron.GetError(doubleConversion, singleConversion));
 
             //    iterations++;
             //}
 
-            int iterations = 0;
+            //GraphLine();
 
-            while (iterations <= 10000000 && perceptron.GetError(DoubleConversion(normalizedPoints), SingleConversion(normalizedPoints, 2)) > 0.001)
+            var normalizedPoints = NormalizeData(0, 1, 0, 1, dataPoints);
+
+            var doubleConversion = DoubleConversion(normalizedPoints);
+
+            var singleConversion = SingleConversion(normalizedPoints, 2);
+
+
+            while (iterations <= 10000000 && perceptron.GetError(doubleConversion, singleConversion) > 0.001)
             {
-                //perceptron.TrainWithHillClimbing(DoubleConversion(dataPoints), SingleConversion(dataPoints, 2), perceptron.GetError(DoubleConversion(dataPoints), SingleConversion(dataPoints, 2)));
-                perceptron.TrainWithHillClimbing(DoubleConversion(normalizedPoints), SingleConversion(normalizedPoints, 2), perceptron.GetError(DoubleConversion(normalizedPoints), SingleConversion(normalizedPoints, 2)));
+                perceptron.TrainWithHillClimbing(doubleConversion, singleConversion, perceptron.GetError(doubleConversion, singleConversion));
 
                 iterations++;
 
             }
+
+            GraphNormalized(normalizedPoints);
+
+            //GraphLineNormalized();
+            GraphLineNormalized2();
 
             IterationCount.Text = iterations.ToString();
 
             //keep in mind that the bias is the y-intercept and the weights are the slope
             //make sure to repeat the hill climbing until you get within a certain amount of error or iterations
 
-            GraphLineNormalized();
+
 
             LinearRegression.Enabled = true;
         }
@@ -202,12 +224,19 @@ namespace LineOfBestFitPerceptronCoreNormalization
         public void GraphNormalized(List<(decimal, decimal)> normalizedPoints)
         {
             gfx.Clear(Color.White);
-            
+
             //Axes lines
             gfx.DrawLine(new Pen(Color.Black), new Point(0, originY), new Point(canvasPictureBox.Width, originY));
             gfx.DrawLine(new Pen(Color.Black), new Point(originX, 0), new Point(originX, canvasPictureBox.Height));
 
-            var unNormalizedPoints = UnNormalizeData(0, canvasPictureBox.Width, 0, canvasPictureBox.Height, normalizedPoints);
+            decimal minY = dataPoints.Select(p => p.Item2).Min();
+            decimal maxY = dataPoints.Select(p => p.Item2).Max();
+
+            decimal minX = dataPoints.Select(p => p.Item1).Min();
+            decimal maxX = dataPoints.Select(p => p.Item1).Max();
+
+
+            var unNormalizedPoints = UnNormalizeData(minX, maxX, minY, maxY, normalizedPoints);
 
             foreach (var point in unNormalizedPoints)
             {
@@ -229,17 +258,59 @@ namespace LineOfBestFitPerceptronCoreNormalization
             decimal min = dataPoints.Select(p => p.Item2).Min();
             decimal max = dataPoints.Select(p => p.Item2).Max();
 
-            var test = NormalizePoint(1, 100, 10, 1000, 50);
-            var untest = UnNormalizePoint(1, 100, 10, 1000, test);
+            var test = NormalizePoint(200, 600, 0, 1, -50);
+            var untest = UnNormalizePoint(0, 999, 0, 1, test);
 
-            decimal yIntercept = UnNormalizePoint(min, max, 0, 1, yInterceptNormalized);
+            //decimal yIntercept = UnNormalizePoint(min, max, 0, 1, yInterceptNormalized);
 
             //the bias is the y-intercept
 
-            var pointA = new Point(0, (int)LinearEquationSolver(-canvasPictureBox.Width / 2, slope, yIntercept));
-            var pointB = new Point(canvasPictureBox.Width, (int)LinearEquationSolver(canvasPictureBox.Width / 2, slope, yIntercept));
+            //var pointA = new Point(0, (int)LinearEquationSolver(-canvasPictureBox.Width / 2, slope, yIntercept));
+            //var pointB = new Point(canvasPictureBox.Width, (int)LinearEquationSolver(canvasPictureBox.Width / 2, slope, yIntercept));
+
+            var pointA = new Point(0, (int)LinearEquationSolver(-canvasPictureBox.Width / 2, slope, yInterceptNormalized));
+            var pointB = new Point(canvasPictureBox.Width, (int)LinearEquationSolver(canvasPictureBox.Width / 2, slope, yInterceptNormalized));
+
 
             gfx.DrawLine(new Pen(Color.Black), pointA, pointB); ;
+
+            canvasPictureBox.Image = canvas;
+        }
+
+        public void GraphLineNormalized2()
+        {
+            decimal slopeNormalized = (decimal)perceptron.weights[0];
+            //Note that if the function is increasing, it will have a negative slope because the y-coordinates are flipped in this type of window forms.
+            //Remeber that the coordinate (0,0) is at the top left corner with x increasing as it moves to the right and y increasing as it moves down.
+            //there is only one value in our weights array and that is the slope.
+            decimal yInterceptNormalized = (decimal)perceptron.bias;
+            //decimal yIntercept = UnNormalizePoint(0, canvasPictureBox.Height, 0, 1, yInterceptNormalized);
+
+            decimal minX = dataPoints.Select(p => p.Item1).Min();
+            decimal maxX = dataPoints.Select(p => p.Item1).Max();
+
+            decimal minY = dataPoints.Select(p => p.Item2).Min();
+            decimal maxY = dataPoints.Select(p => p.Item2).Max();
+
+            var pointAN = new Point(0, (int)LinearEquationSolver(0, slopeNormalized, yInterceptNormalized));
+            var pointBN = new Point(1, (int)LinearEquationSolver(1, slopeNormalized, yInterceptNormalized));
+
+            var pointA = new Point((int)UnNormalizePoint(minX, maxX, 0, 1, pointAN.X), (int)UnNormalizePoint(minY, maxY, 0, 1, pointAN.Y));
+            var pointB = new Point((int)UnNormalizePoint(minX, maxX, 0, 1, pointBN.X), (int)UnNormalizePoint(minY, maxY, 0, 1, pointBN.Y));
+
+            gfx.DrawLine(new Pen(Color.Black), pointA, pointB); ;
+
+            canvasPictureBox.Image = canvas;
+        }
+
+        public void GraphLine()
+        {
+            decimal slope = (decimal)perceptron.weights[0];
+            //there is only one value in our weights array and that is the slope.
+            decimal yIntercept = (decimal)perceptron.bias;
+            //the bias is the y-intercept
+
+            gfx.DrawLine(new Pen(Color.Black), new Point(0, (int)LinearEquationSolver(0, slope, yIntercept)), new Point(canvasPictureBox.Width, (int)LinearEquationSolver(canvasPictureBox.Width, slope, yIntercept)));
 
             canvasPictureBox.Image = canvas;
         }
