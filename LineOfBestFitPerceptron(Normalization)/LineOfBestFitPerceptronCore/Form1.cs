@@ -43,10 +43,10 @@ namespace LineOfBestFitPerceptronCoreNormalization
 
 
             //Please delete this later:
-            dataPoints.Add((314, 79));
-            dataPoints.Add((230, 281));
-            dataPoints.Add((248, 360));
-            dataPoints.Add((296, 165));
+            //dataPoints.Add((230, 281));
+            //dataPoints.Add((248, 360));
+            //dataPoints.Add((296, 165));
+            //dataPoints.Add((314, 79));
 
             Graph();
         }
@@ -292,11 +292,13 @@ namespace LineOfBestFitPerceptronCoreNormalization
             decimal minY = dataPoints.Select(p => p.Item2).Min();
             decimal maxY = dataPoints.Select(p => p.Item2).Max();
 
-            var pointAN = new Point(0, (int)LinearEquationSolver(0, slopeNormalized, yInterceptNormalized));
-            var pointBN = new Point(1, (int)LinearEquationSolver(1, slopeNormalized, yInterceptNormalized));
+            var pointANX = 0;
+            var pointANY = LinearEquationSolver(0, slopeNormalized, yInterceptNormalized);
+            var pointBNX = 1;
+            var pointBNY = LinearEquationSolver(1, slopeNormalized, yInterceptNormalized);
 
-            var pointA = new Point((int)UnNormalizePoint(minX, maxX, 0, 1, pointAN.X), (int)UnNormalizePoint(minY, maxY, 0, 1, pointAN.Y));
-            var pointB = new Point((int)UnNormalizePoint(minX, maxX, 0, 1, pointBN.X), (int)UnNormalizePoint(minY, maxY, 0, 1, pointBN.Y));
+            var pointA = new Point((int)UnNormalizePoint(minX, maxX, 0, 1, pointANX), (int)UnNormalizePoint(minY, maxY, 0, 1, pointANY));
+            var pointB = new Point((int)UnNormalizePoint(minX, maxX, 0, 1, pointBNX), (int)UnNormalizePoint(minY, maxY, 0, 1, pointBNY));
 
             gfx.DrawLine(new Pen(Color.Black), pointA, pointB); ;
 
